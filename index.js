@@ -1,26 +1,26 @@
 import express from 'express';
 import { createServer } from 'node:http';
-import { wisp } from '@mercuryworkshop/wisp-js/server';
+import { server as wisp } from '@mercuryworkshop/wisp-js/server';
 
 const app = express();
-const server = createServer(app);
+const httpServer = createServer(app);
 
-// Basic Landing Page for Render
+// Simple landing page so Render knows it's alive
 app.get('/', (req, res) => {
-    res.send('Wisp Server is Online');
+    res.send('Wisp Server: Online and Operational');
 });
 
 const PORT = process.env.PORT || 3000;
 
-// This is the critical part for Wisp/WebSockets
-server.on('upgrade', (req, socket, head) => {
+// This is the bridge that makes the proxy work
+httpServer.on('upgrade', (req, socket, head) => {
     if (req.url.startsWith('/wisp/')) {
-        wisp(req, socket, head);
+        wisp.routeRequest(req, socket, head);
     } else {
         socket.end();
     }
 });
 
-server.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(`Wisp Server live on port ${PORT}`);
 });
